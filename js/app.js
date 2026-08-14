@@ -61,8 +61,13 @@ window.FF = window.FF || {};
     /* --------------------------------------------------------------- Main */
     topbarTitle = FF.el("h1", { text: "" });
     topbarSub = FF.el("span", { class: "topbar__sub" });
+    var helpBtn = FF.el("button", {
+      class: "btn btn--ghost btn--icon has-tip", "data-tip": "Around the app", "aria-label": "Show app guide",
+      html: FF.icon("info", { size: 18 }), onClick: function () { FF.showGuide(); },
+    });
     var topbar = FF.el("header", { class: "topbar" }, [
       FF.el("div", { class: "grow" }, [topbarTitle, FF.el("div", {}, [topbarSub])]),
+      helpBtn,
     ]);
 
     var screenWrap = FF.el("div", {});

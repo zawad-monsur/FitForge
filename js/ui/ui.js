@@ -155,6 +155,39 @@ window.FF = window.FF || {};
     return { scrim: scrim, modal: modalEl, close: FF.closeModal };
   };
 
+  /* Quick tour of the main screens — shown once automatically after
+     onboarding finishes, and reachable anytime after via the "?" button in
+     the topbar. Onboarding's own intro step explains the *setup* flow;
+     this explains the *app* itself, which is a different kind of confusing
+     ("what's the difference between the list in Studio and the list in
+     Workout") that only comes up once you're actually using it. */
+  FF.showGuide = function () {
+    var items = [
+      { icon: "home", title: "Dashboard", desc: "Your day at a glance — today's workout, today's meals, streak, quick actions." },
+      { icon: "dumbbell", title: "Workout", desc: "Log today's actual session: check off sets, enter weight and reps, rest timer." },
+      { icon: "utensils", title: "Nutrition", desc: "Your meal plan, recipes, grocery list, and a food log for anything off-plan." },
+      { icon: "chart", title: "Progress", desc: "Bodyweight trend, weekly training volume, and personal records over time." },
+      { icon: "message", title: "Coach", desc: "Ask questions about your plan — it can see your real goals, split, and meals." },
+      { icon: "sliders", title: "Studio", desc: "Edit everything: swap exercises or meals, override targets, change how the app looks, back up your data." },
+    ];
+    var list = el("div", { class: "stack g-4" });
+    items.forEach(function (item) {
+      list.appendChild(el("div", { class: "row g-4", style: { alignItems: "flex-start" } }, [
+        el("span", { class: "option__icon", html: FF.icon(item.icon, { size: 18 }) }),
+        el("div", {}, [
+          el("div", { class: "option__title", text: item.title }),
+          el("div", { class: "option__desc", text: item.desc }),
+        ]),
+      ]));
+    });
+    list.appendChild(el("p", { class: "tiny dim", style: { marginTop: "4px" } },
+      [el("strong", { text: "Studio vs. Workout/Nutrition: " }), el("span", { text: "Studio edits the plan itself — Workout and Nutrition log what you actually did against it." })]
+    ));
+
+    var gotItBtn = el("button", { class: "btn btn--primary", text: "Got it", onClick: function () { FF.closeModal(); } });
+    FF.modal({ title: "Around the app", body: list, footer: [gotItBtn] });
+  };
+
   FF.confirm = function (opts) {
     var body = el("p", { class: "muted", text: opts.message || "Are you sure?" });
     var cancelBtn = el("button", { class: "btn", text: opts.cancelLabel || "Cancel", onClick: function () { FF.closeModal(); } });

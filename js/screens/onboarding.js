@@ -650,6 +650,17 @@ window.FF = window.FF || {};
       overlay.innerHTML = "";
       if (FF.app && FF.app.boot) FF.app.boot();
       FF.toast("Your plan is ready — welcome to FitForge.", "ok");
+
+      /* The onboarding intro (first step) explains the setup *questions*;
+         this explains the *app itself* once there's actually an app to
+         look at — a different kind of "confusing at first" that only shows
+         up once you're using it, not while answering questions. */
+      if (!FF.store.get().prefs.sawGuide) {
+        setTimeout(function () {
+          FF.store.patch("prefs", { sawGuide: true }, true);
+          FF.showGuide();
+        }, 700);
+      }
     }, 420);
   }
 

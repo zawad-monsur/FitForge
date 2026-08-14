@@ -93,6 +93,7 @@ window.FF = window.FF || {};
         restTimer: true,
         defaultRest: 90,
         weekStart: 1,          // 1 = Monday
+        sawGuide: false,       // "Around the app" tour — shown once automatically, replayable via the topbar's "?" button
       },
     };
   }
