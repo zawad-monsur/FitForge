@@ -522,7 +522,20 @@ window.FF = window.FF || {};
     var skipBtn = FF.el("button", { class: "btn btn--ghost", type: "button", text: "Skip" });
     var nextBtn = FF.el("button", { class: "btn btn--primary btn--lg", type: "button" });
 
-    backBtn.addEventListener("click", function () { if (index > 0) { index--; render(); } });
+    /* render()'s own skip handling only ever walks forward (see below) — so
+       landing on a skipped step by going *backward* (e.g. the equipment
+       step, skipped when location is "gym") would immediately bounce right
+       back forward to where we started, making Back silently do nothing.
+       Not just a step-1 thing — it happened on whichever step sat right
+       after any skipped one. Walk backward past skipped steps here instead
+       of relying on render()'s forward-only logic. */
+    backBtn.addEventListener("click", function () {
+      if (index <= 0) return;
+      var i = index - 1;
+      while (i > 0 && STEPS[i].skip && STEPS[i].skip(draft)) i--;
+      index = i;
+      render();
+    });
     skipBtn.addEventListener("click", function () { advance(); });
     nextBtn.addEventListener("click", function () { advance(); });
 
