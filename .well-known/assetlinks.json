@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.zawad_monsur.twa",
+    "sha256_cert_fingerprints": ["12:19:00:61:1A:B9:88:37:26:05:7E:95:2A:51:F2:46:5E:4D:03:C5:08:45:D3:BF:91:4F:8B:C4:F8:44:37:12"]
+  }
+}]
