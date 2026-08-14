@@ -929,6 +929,51 @@ User corrected two things from Checkpoint 21 that were each slightly off.
    auto-opened it with the flag set to `true` afterward, and the topbar
    button correctly reopens the same modal on demand afterward.
 
+## Checkpoint 23 — Manifest icon links, actually fixed (not just re-verified)
+
+PWABuilder re-scan came back with a *critical* "fix the links to your icons"
+plus a sizes warning, despite every icon URL independently returning 200
+with the correct content-type when checked directly (re-verified before
+touching anything, to rule out a transient issue). Root-caused rather than
+re-checked-and-shrugged:
+
+1. **Relative icon paths are a known PWABuilder crawler weak point** — its
+   validator has a history of resolving manifest-relative URLs against the
+   wrong base in some scan paths. Since there's no way to inspect
+   PWABuilder's crawler directly, fixed by eliminating the ambiguity
+   entirely: every icon `src`, `start_url`, `scope`, `id`, and the
+   `serviceworker.src` in `manifest.json` are now full absolute URLs
+   (`https://zawad-monsur.github.io/FitForge/...`) instead of relative
+   ones. No base-URL resolution left for anything to get wrong. Trade-off,
+   noted here since it's not obvious from the code: these are hardcoded to
+   the current GitHub Pages URL, so they'd need updating by hand if this
+   ever moves to a different host or a custom domain.
+2. **The icon-sizes warning was the SVG entries' `"sizes": "any"`** — spec-
+   valid for scalable icons, but PWABuilder's stricter checker wants
+   explicit pixel dimensions on every entry. Since the PNG icons already
+   satisfy every real requirement (both `any` and `maskable` purposes, both
+   192 and 512), dropped the SVG manifest entries rather than fight the
+   warning. The SVG files themselves were then unreferenced by anything —
+   `apple-touch-icon` in `index.html` was pointing at one too (iOS's
+   support for SVG there is inconsistent across versions, so switched it to
+   the 512 PNG while in here), which made them fully dead — deleted
+   `icons/icon.svg` and `icons/icon-maskable.svg`, and removed them from
+   `sw.js`'s precache list (bumped to `fitforge-shell-v4`, since the
+   precache set changed again).
+3. Added the two `info`-level suggestions too: `"categories":
+   ["health","fitness","lifestyle"]` and `"prefer_related_applications":
+   false`.
+4. Verified on the live site, not just locally: manifest validated as
+   syntactically correct JSON before pushing, then polled the live URL
+   after push until GitHub Pages' rebuild picked it up (~20s) and confirmed
+   the new absolute-URL, PNG-only, categories-included manifest is what's
+   actually being served.
+
+Still open: the screenshots warning (needs real captures, Browser pane
+still not compositing this session).
+
+Also sent the three PNG icon files directly to the user on request.
+
 ### Ideas for a next pass (not started, not blocking)
 
 - Exposing the macro-scaling blend weights (0.7 calorie / 0.3 protein) as a
