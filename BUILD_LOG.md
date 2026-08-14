@@ -824,15 +824,82 @@ default tab is Training again on a fresh session.
      trial banner is for GitHub Enterprise's *private* Pages visibility
      feature, unrelated to a standard public repo, which is what this is.
 
+## Checkpoint 21 — PWABuilder compliance, a real Enter-key bug, and a welcome intro
+
+User ran the now-live site through pwabuilder.com (working toward the APK
+path from Checkpoint 20's "next pass" list) and got a manifest score of
+15/45 with a critical error and several warnings. Fixed the real ones:
+
+1. **"Add a 192x192 PNG icon" / "Add a 512x512 PNG icon" (critical +
+   warning).** The manifest only listed SVG icons — fine for browsers, but
+   app-store packaging (and PWABuilder's own scoring) wants actual raster
+   PNGs. Generated real ones via an in-browser `<canvas>` (same terracotta
+   mark as the SVGs, at 192, 512, and a 512 maskable variant with a wider
+   safe-zone padding), saved them through a small Node script this time
+   (the abandoned attempt from Checkpoint 9 never actually wrote files to
+   disk — this one did, and verified each file's actual width/height by
+   reading the PNG header bytes directly rather than trusting the encode
+   step). Added all three to `manifest.json`'s `icons` array alongside the
+   existing SVGs (both formats now listed — SVG for browsers that prefer
+   it, PNG for anything that requires it) and to `sw.js`'s precache list.
+2. **"Add a service worker" warning, despite one already existing.**
+   PWABuilder's manifest scoring checks for a static `"serviceworker"` field
+   in `manifest.json` itself, separate from whatever `navigator.
+   serviceWorker.register()` does at runtime — added `{"serviceworker":
+   {"src": "sw.js", "scope": "./"}}`.
+3. **"Add an id to your manifest" warning** — added `"id": "./"`.
+4. **"Add screenshots" warning — not fixed.** Needs real captured
+   screenshots of the running app; the Browser pane wasn't compositing
+   frames this session (a recurring environment limitation this session),
+   so nothing was available to capture. Left for later rather than
+   fabricating placeholder images.
+5. Bumped the service worker's cache to `fitforge-shell-v3` (precache list
+   changed, so the version needs to change too, per the comment already in
+   `sw.js` from when this exact class of bug got fixed in Checkpoint 17).
+   Verified live: manifest returns 200 with the new fields, all three PNGs
+   return 200 at their expected sizes.
+
+**Also fixed two things reported from actual first-time use:**
+
+6. **Enter key did nothing on any onboarding text field**, including the
+   very first name field — no step's input was wrapped in a `<form>`, so
+   there was no native submit to fall back on, and nothing wired Enter to
+   anything. Fixed at the wizard level (one delegated `keydown` listener on
+   the step body, not patched into each step individually), so it now
+   works for every current and future text/number input in the wizard, not
+   just the one the user happened to hit first. Verified: Enter on the name
+   field now advances to "The basics" exactly like clicking Continue.
+7. **"Back button doesn't work" on the name page — checked, and it's
+   correct as-is, not a bug.** Back is deliberately disabled on step 1
+   (`index === 0`) since there's nothing before the first step to go back
+   to. Verified both that `disabled` is actually `true` there and that the
+   disabled state is visually unambiguous (45% opacity, `pointer-events:
+   none`) — so this wasn't a case of a disabled button looking enabled, it
+   really is supposed to do nothing on that specific step. No code change.
+
+**And a UX gap**: user said the app "gets confusing at first" and asked for
+instructions for newcomers. Added a new first step to onboarding — "How
+this works" — a plain four-point explainer (quick questions → we build your
+plan → track as you go → change anything anytime in Studio) shown before
+any question is asked, so the shape of the whole flow is clear before
+diving into 20+ steps of it. Verified the wizard still completes correctly
+end-to-end with the extra step (plan and meal plan generate, overlay
+closes, console clean) — inserting a step at the front shifts every
+subsequent step's index, which is exactly the kind of change that's easy to
+silently break something with, so this got a full click-through, not just
+a glance at the new step in isolation.
+
 ### Ideas for a next pass (not started, not blocking)
 
 - Exposing the macro-scaling blend weights (0.7 calorie / 0.3 protein) as a
   Studio setting instead of a hardcoded constant in `mealplanner.js`.
+- Real app screenshots for the manifest's `screenshots` field (PWABuilder
+  warning) — needs the Browser pane actually compositing frames, which
+  wasn't available this session.
 - A real native-wrapped install (Capacitor or PWABuilder → signed APK) —
-  now that the app is hosted, this is unblocked, but needs either a local
-  Java/Android SDK toolchain (not present in this environment) or the
-  PWABuilder web tool (pwabuilder.com, points at the now-live URL, no local
-  toolchain needed) — not attempted yet, pending the user's go-ahead.
-- In-workout PR celebration, quick-start onboarding path, and a gamified
-  streak/streak-freeze system — surfaced from `comprehensive_report.md`
-  a while back, still not built.
+  the manifest is now much closer to store-ready (icons, id, serviceworker
+  field all fixed); screenshots are the main remaining gap before trying
+  PWABuilder's actual packaging step.
+- In-workout PR celebration, quick-start onboarding path (partially
+  addressed by the new welcome step, but not a true "skip to defaults"
+  fast path), and a gamified streak/streak-freeze system — still not built.
