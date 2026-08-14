@@ -768,12 +768,71 @@ About is the last card title on every one, exactly once each — confirmed
 programmatically, not just by eyeballing one tab. Also confirmed the
 default tab is Training again on a fresh session.
 
+## Checkpoint 20 — Toggle redesign, and the repo is live
+
+1. **Switches redesigned.** Same root cause as the earlier chip bug, different
+   component: `.switch__thumb` was `background: var(--surface)`, which in
+   dark mode is nearly the same dark tone as the track — the thumb visually
+   vanished and the whole control read as a blank pill, not a toggle (user's
+   screenshot: "Custom" switch looked empty). Rather than guess a fix and
+   risk another wrong turn, showed the user two real rendered mockups via
+   `AskUserQuestion` (classic round-thumb slider vs. a wide capsule with
+   OFF/ON text baked into the thumb) — they picked the classic slider,
+   scaled up and with real contrast: thumb is now a fixed bright cream
+   (`#fffaf5`, never theme-tinted — the way every real OS toggle does it),
+   track gets an inset shadow so it reads as a groove the thumb sits in,
+   plus visible hover/focus states. Verified computed colors on the actual
+   page: track `rgb(51,45,39)` vs. thumb `rgb(255,250,245)` — stark
+   contrast, confirmed both by computed style and a screenshot.
+
+2. **The repo is public and live.** User created
+   `github.com/zawad-monsur/FitForge` and asked for hosting + a professional
+   README + a license decision, explicitly **no Claude/AI attribution
+   anywhere in the commits**.
+   - Checked the environment first rather than assume: no `gh` CLI, no
+     existing GitHub auth, no Java/Gradle (so no local native-APK build
+     path is available here — Capacitor/Bubblewrap would need that
+     toolchain installed first, not attempted). Git itself was already
+     configured with the user's real name/email, likely from GitHub
+     Desktop being installed.
+   - `git init`, wrote a comprehensive `README.md` (features, run
+     instructions, PWA install steps for both platforms, AI Coach setup,
+     full project layout, data/privacy, design direction, license), added
+     an MIT `LICENSE` (recommended as the standard choice for a public
+     personal project; easy to swap later), single clean commit with plain
+     commit messages — no AI co-author line, per the explicit instruction.
+   - `git push` authenticated silently (confirms git's existing credential
+     helper works) but was rejected — GitHub had auto-initialized the repo
+     with its own placeholder README on creation. Since that placeholder
+     had zero real content to lose, force-pushed the real initial commit
+     over it rather than merging in a throwaway commit and leaving merge
+     noise in the history of a repo meant to "look professional."
+   - GitHub Pages: enabling it requires the Settings UI (no API/CLI access
+     available here), so walked the user through it screenshot-by-
+     screenshot as they hit two points of confusion (the Source-type
+     dropdown vs. the actual Branch dropdown; the unrelated GitHub
+     Enterprise 30-day trial upsell shown on the same page). Live at
+     `https://zawad-monsur.github.io/FitForge/` — verified directly, not
+     just assumed: root + every key asset (manifest, service worker, all
+     CSS/JS, icons) returns 200, the page loads with zero console errors on
+     the real production origin, and the service worker registers with the
+     correct scope (`.../FitForge/`) — confirming the earlier relative-path
+     audit (done back when the PWA layer was first built, specifically to
+     survive being served from a subpath rather than domain root) actually
+     holds up in production, not just in local testing.
+   - Answered directly: GitHub Pages doesn't expire after 30 days — that
+     trial banner is for GitHub Enterprise's *private* Pages visibility
+     feature, unrelated to a standard public repo, which is what this is.
+
 ### Ideas for a next pass (not started, not blocking)
 
-- Drag-and-drop reordering in the Studio (currently up/down buttons — works
-  fine, just less fluid).
-- A dedicated "volume chart" on Progress (sets × weight over time per muscle
-  group) — only PRs and adherence are there today.
 - Exposing the macro-scaling blend weights (0.7 calorie / 0.3 protein) as a
   Studio setting instead of a hardcoded constant in `mealplanner.js`.
-- Service worker for offline use / installability (PWA manifest).
+- A real native-wrapped install (Capacitor or PWABuilder → signed APK) —
+  now that the app is hosted, this is unblocked, but needs either a local
+  Java/Android SDK toolchain (not present in this environment) or the
+  PWABuilder web tool (pwabuilder.com, points at the now-live URL, no local
+  toolchain needed) — not attempted yet, pending the user's go-ahead.
+- In-workout PR celebration, quick-start onboarding path, and a gamified
+  streak/streak-freeze system — surfaced from `comprehensive_report.md`
+  a while back, still not built.
