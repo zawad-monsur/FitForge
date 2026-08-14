@@ -503,6 +503,22 @@ window.FF = window.FF || {};
     skipBtn.addEventListener("click", function () { advance(); });
     nextBtn.addEventListener("click", function () { advance(); });
 
+    /* Enter inside a text/number field advances the step, same as clicking
+       Continue — none of the step inputs are wrapped in a <form>, so there
+       was no native submit behavior to fall back on and Enter did nothing
+       at all. Attached once on `body` (event delegation) so it keeps
+       working across every re-render without needing to be wired into each
+       step's own build() individually. Excludes textareas, where Enter
+       should insert a newline instead. */
+    body.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      var tag = e.target.tagName;
+      if (tag === "INPUT" || tag === "SELECT") {
+        e.preventDefault();
+        advance();
+      }
+    });
+
     function advance() {
       if (index < STEPS.length - 1) { index++; render(); }
       else finish(draft);

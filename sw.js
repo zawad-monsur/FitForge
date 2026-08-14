@@ -13,7 +13,7 @@
    index.html.
    ========================================================================== */
 
-var CACHE = "fitforge-shell-v2";
+var CACHE = "fitforge-shell-v3";
 
 var PRECACHE = [
   "./",
@@ -43,6 +43,9 @@ var PRECACHE = [
   "./js/app.js",
   "./icons/icon.svg",
   "./icons/icon-maskable.svg",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/icon-512-maskable.png",
 ];
 
 self.addEventListener("install", function (event) {
