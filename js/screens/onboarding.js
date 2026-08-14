@@ -132,6 +132,29 @@ window.FF = window.FF || {};
 
   var STEPS = [
     {
+      group: 0, kicker: "Welcome", question: "How this works",
+      hint: "Four quick things before we start.",
+      build: function (root) {
+        var items = [
+          { icon: "list", title: "A few quick questions", desc: "About you, your equipment, your kitchen, and your schedule — mostly just tapping, a couple of minutes." },
+          { icon: "dumbbell", title: "We build your plan", desc: "A workout split and a weekly meal plan, generated specifically from what you tell us — not a generic template." },
+          { icon: "chart", title: "Track as you go", desc: "Log your sets and meals from Workout and Nutrition. Everything stays on this device — nothing is sent anywhere." },
+          { icon: "sliders", title: "Change anything, anytime", desc: "Studio lets you edit the plan, swap exercises or meals, override targets, and more. Nothing here is final." },
+        ];
+        var list = FF.el("div", { class: "stack g-5" });
+        items.forEach(function (item, i) {
+          list.appendChild(FF.el("div", { class: "row g-4", style: { alignItems: "flex-start" } }, [
+            FF.el("span", { class: "option__icon", html: FF.icon(item.icon, { size: 18 }) }),
+            FF.el("div", {}, [
+              FF.el("div", { class: "option__title", text: (i + 1) + ". " + item.title }),
+              FF.el("div", { class: "option__desc", text: item.desc }),
+            ]),
+          ]));
+        });
+        root.appendChild(list);
+      },
+    },
+    {
       group: 0, kicker: "Welcome", question: "What should we call you?",
       hint: "Just for your dashboard greeting — nothing is sent anywhere.",
       build: function (root, draft) {
