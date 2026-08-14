@@ -13,7 +13,7 @@
    index.html.
    ========================================================================== */
 
-var CACHE = "fitforge-shell-v3";
+var CACHE = "fitforge-shell-v4";
 
 var PRECACHE = [
   "./",
@@ -41,8 +41,6 @@ var PRECACHE = [
   "./js/screens/coach.js",
   "./js/screens/studio.js",
   "./js/app.js",
-  "./icons/icon.svg",
-  "./icons/icon-maskable.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-512-maskable.png",
