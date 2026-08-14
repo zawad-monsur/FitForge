@@ -889,6 +889,46 @@ subsequent step's index, which is exactly the kind of change that's easy to
 silently break something with, so this got a full click-through, not just
 a glance at the new step in isolation.
 
+## Checkpoint 22 — The Back button bug, actually fixed; a real post-setup guide
+
+User corrected two things from Checkpoint 21 that were each slightly off.
+
+1. **"Back button wasn't working" was reported again — not just the name
+   page.** The earlier check (Checkpoint 21) only tested step 1, where Back
+   being disabled is correct by design, and concluded there was nothing to
+   fix. Wrong scope — the user meant *other* steps too. Re-investigated and
+   found a real bug: `render()`'s skip-handling only ever walks *forward*
+   (if the current step should be skipped, `index++` and re-render) — it
+   has no backward case. So clicking Back from any step immediately
+   following a skipped one (e.g. the equipment step, skipped whenever
+   `location === "gym"`) would land index on the skipped step, which
+   render() would then immediately bounce forward again — right back to
+   where Back was clicked from. Visually indistinguishable from the button
+   doing nothing. Fixed by making the Back handler itself walk backward
+   past any skippable steps, rather than relying on render()'s forward-only
+   logic. Verified the exact repro: chose "Commercial gym" → equipment step
+   correctly skipped → clicked Back from "Anything we should train
+   around?" → now correctly lands on "Where do you train?" (previously
+   would have silently stayed put); a second Back click continued working
+   normally after that.
+
+2. **The "instructions for newcomers" ask was answered in the wrong
+   place.** Checkpoint 21's "How this works" step explains the *onboarding
+   questions* — useful, but not what was asked for. User clarified: they
+   wanted guidance on the *main app itself*, after setup, since that's
+   where the actual confusion was (matches the earlier "what's the list in
+   Studio vs. the list in Workout" question). Added `FF.showGuide()`
+   (`js/ui/ui.js`) — a modal covering all six main screens (Dashboard,
+   Workout, Nutrition, Progress, Coach, Studio) in plain language, plus one
+   explicit line on the Studio-vs-Workout/Nutrition distinction that had
+   caused confusion before. Shown automatically once, ~700ms after
+   onboarding's "plan is ready" toast (`prefs.sawGuide` flag, added to the
+   store schema, gates it so it never repeats automatically) — and
+   reachable anytime after via a new "?" button in the topbar, present on
+   every screen. Verified both paths live: a full onboarding run correctly
+   auto-opened it with the flag set to `true` afterward, and the topbar
+   button correctly reopens the same modal on demand afterward.
+
 ### Ideas for a next pass (not started, not blocking)
 
 - Exposing the macro-scaling blend weights (0.7 calorie / 0.3 protein) as a
